@@ -1,0 +1,15 @@
+C:\Users\Mike\Desktop\Programming\C#\WPF_MVVM_SudokuSolver\bin\Debug\WPF_MVVM_SudokuSolver.exe.config
+C:\Users\Mike\Desktop\Programming\C#\WPF_MVVM_SudokuSolver\bin\Debug\WPF_MVVM_SudokuSolver.exe
+C:\Users\Mike\Desktop\Programming\C#\WPF_MVVM_SudokuSolver\bin\Debug\WPF_MVVM_SudokuSolver.pdb
+C:\Users\Mike\Desktop\Programming\C#\WPF_MVVM_SudokuSolver\obj\Debug\WPF_MVVM_SudokuSolver.csproj.AssemblyReference.cache
+C:\Users\Mike\Desktop\Programming\C#\WPF_MVVM_SudokuSolver\obj\Debug\MainWindow.g.cs
+C:\Users\Mike\Desktop\Programming\C#\WPF_MVVM_SudokuSolver\obj\Debug\App.g.cs
+C:\Users\Mike\Desktop\Programming\C#\WPF_MVVM_SudokuSolver\obj\Debug\WPF_MVVM_SudokuSolver_MarkupCompile.cache
+C:\Users\Mike\Desktop\Programming\C#\WPF_MVVM_SudokuSolver\obj\Debug\WPF_MVVM_SudokuSolver_MarkupCompile.lref
+C:\Users\Mike\Desktop\Programming\C#\WPF_MVVM_SudokuSolver\obj\Debug\MainWindow.baml
+C:\Users\Mike\Desktop\Programming\C#\WPF_MVVM_SudokuSolver\obj\Debug\WPF_MVVM_SudokuSolver.g.resources
+C:\Users\Mike\Desktop\Programming\C#\WPF_MVVM_SudokuSolver\obj\Debug\WPF_MVVM_SudokuSolver.Properties.Resources.resources
+C:\Users\Mike\Desktop\Programming\C#\WPF_MVVM_SudokuSolver\obj\Debug\WPF_MVVM_SudokuSolver.csproj.GenerateResource.cache
+C:\Users\Mike\Desktop\Programming\C#\WPF_MVVM_SudokuSolver\obj\Debug\WPF_MVVM_SudokuSolver.csproj.CoreCompileInputs.cache
+C:\Users\Mike\Desktop\Programming\C#\WPF_MVVM_SudokuSolver\obj\Debug\WPF_MVVM_SudokuSolver.exe
+C:\Users\Mike\Desktop\Programming\C#\WPF_MVVM_SudokuSolver\obj\Debug\WPF_MVVM_SudokuSolver.pdb
