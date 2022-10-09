@@ -56,8 +56,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Models\DisplayPackage.cs" />
+    <Compile Include="ViewModels\Converters\PuzzleValueConverter.cs" />
+    <Compile Include="ViewModels\SquareView.cs" />
     <Compile Include="ViewModels\ViewBuilder.cs" />
     <Compile Include="ViewModels\ViewModel.cs" />
+    <Compile Include="ViewModels\ViewSettings.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

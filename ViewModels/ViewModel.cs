@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using WPF_MVVM_SudokuSolver.Models;
 
 namespace WPF_MVVM_SudokuSolver.ViewModels
@@ -13,7 +14,8 @@ namespace WPF_MVVM_SudokuSolver.ViewModels
     {
         private string[,][] _puzzleValues;
         private string[,][][] _possibleValues;
-        private Model model = new Model();
+        private Model _model;
+        private ViewBuilder _viewBuilder;
 
         public string[,][] PuzzleValues
         {
@@ -33,15 +35,18 @@ namespace WPF_MVVM_SudokuSolver.ViewModels
             }
         }
 
-
-        public ViewModel()
+        public ViewModel(Grid rootGrid)
         {
+            _model = new Model();
+            UpdateValues();
+            _viewBuilder = new ViewBuilder(rootGrid, this);
+
             
         }
 
         private void UpdateValues()
         {
-            DisplayPackage package = model.CreateDisplayPackage();
+            DisplayPackage package = _model.CreateDisplayPackage();
 
             PuzzleValues = package.PuzzleValues;
             PossibleValues = package.PossibleValues;

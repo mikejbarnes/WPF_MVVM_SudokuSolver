@@ -25,7 +25,7 @@ namespace WPF_MVVM_SudokuSolver
         {
             InitializeComponent();
 
-            DataContext = new ViewModel();
+            DataContext = new ViewModel(rootGrid);
         }
     }
 }

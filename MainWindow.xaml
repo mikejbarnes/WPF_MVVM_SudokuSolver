@@ -5,8 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPF_MVVM_SudokuSolver"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="1000">
-    <Grid>
-        
+        Title="MainWindow" Height="1000" Width="1200">
+    <Grid Name="rootGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.5*"/>
+            <ColumnDefinition Width="9*"/>
+            <ColumnDefinition Width="1.5*"/>
+        </Grid.ColumnDefinitions>
     </Grid>
 </Window>
