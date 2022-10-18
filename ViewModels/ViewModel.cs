@@ -5,51 +5,61 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using WPF_MVVM_SudokuSolver.Models;
+using WPF_MVVM_SudokuSolver.ViewModels.Commands;
 
 namespace WPF_MVVM_SudokuSolver.ViewModels
 {
     class ViewModel: INotifyPropertyChanged
     {
-        private string[,][] _puzzleValues;
-        private string[,][][] _possibleValues;
         private Model _model;
+        private Solver _solver;
+        private Square[,] _squares;
         private ViewBuilder _viewBuilder;
+        private string _inputText;
 
-        public string[,][] PuzzleValues
+        public Square[,] Squares
         {
-            get { return _puzzleValues;  }
+            get { return _squares; }
             set
             {
-                _puzzleValues = value;
+                _squares = value;
+                OnPropertyRaised();
             }
         }
 
-        public string[,][][] PossibleValues
+        public string InputText 
         {
-            get { return _possibleValues; }
-            set
+            get { return _inputText; } 
+            set 
             {
-                _possibleValues = value;
-            }
+                _inputText = value;
+                OnPropertyRaised();
+            } 
         }
+
+        public RelayCommand LoadPuzzleCommand { get; set; }
+        public RelayCommand SolveNextStepCommand { get; set; }
+        public RelayCommand SolvePuzzleCommand { get; set; }
 
         public ViewModel(Grid rootGrid)
         {
             _model = new Model();
+            _solver = new Solver(_model);
+            _squares = new Square[ModelSettings.Numbers, ModelSettings.Numbers];
             UpdateValues();
             _viewBuilder = new ViewBuilder(rootGrid, this);
 
-            
+            LoadPuzzleCommand = new RelayCommand(LoadPuzzle, CanUseLoadPuzzle);
+            SolveNextStepCommand = new RelayCommand(SolveNextStep, CanUseSolveNextStep);
+            SolvePuzzleCommand = new RelayCommand(SolvePuzzle, CanUseSolvePuzzle);
         }
 
         private void UpdateValues()
         {
-            DisplayPackage package = _model.CreateDisplayPackage();
-
-            PuzzleValues = package.PuzzleValues;
-            PossibleValues = package.PossibleValues;
+            Squares = _model.Squares;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -61,5 +71,55 @@ namespace WPF_MVVM_SudokuSolver.ViewModels
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+
+        #region LoadPuzzle()
+        public void LoadPuzzle()
+        {
+            string conditionedText;
+            bool inputTextIsOk = InputTextConditioner.ConditionInputText(_inputText, out conditionedText);
+            if (inputTextIsOk)
+            {
+                _model.LoadPuzzle(conditionedText);
+                _solver.ResetSolver();
+                InputText = "";
+                UpdateValues();
+            }
+            else
+            {
+                MessageBox.Show("Puzzle text not formatted correctly.");
+            }
+        }
+
+        public bool CanUseLoadPuzzle()
+        {
+            return true;
+        }
+        #endregion
+
+        #region SolveNextStep()
+        public void SolveNextStep()
+        {
+            _solver.SolveNextStep();
+            UpdateValues();
+        }
+
+        public bool CanUseSolveNextStep()
+        {
+            return true;
+        }
+        #endregion
+
+        #region SolvePuzzle()
+        public void SolvePuzzle()
+        {
+            _solver.SolveAll();
+            UpdateValues();
+        }
+
+        public bool CanUseSolvePuzzle()
+        {
+            return true;
+        }
+        #endregion
     }
 }

@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using WPF_MVVM_SudokuSolver.Models;
 using WPF_MVVM_SudokuSolver.ViewModels.Converters;
 
 namespace WPF_MVVM_SudokuSolver.ViewModels
@@ -21,36 +22,50 @@ namespace WPF_MVVM_SudokuSolver.ViewModels
 
         public int Row { get; private set; }
         public int Column { get; private set; }
+        public int[] Indexes { get; private set; }
 
         public SquareView(Grid parentGrid, int row, int column, ViewModel dataContext)
         {
             _dataContext = dataContext;
+            Row = row;
+            Column = column;
 
-            InitializeGrid(row, column);
-            InitializeValueCells(row, column);
+            InitializeIndexes();
+            InitializeGrid();
+            InitializeValueCells();
 
             parentGrid.Children.Add(_grid);
         }
 
-        private void InitializeGrid(int row, int column)
+        private void InitializeIndexes()
+        {
+            Indexes = new int[ModelSettings.Numbers];
+
+            for (int i = 0; i < ModelSettings.Numbers; i++)
+            {
+                Indexes[i] = i;
+            }
+        }
+
+        private void InitializeGrid()
         {
             _grid = new Grid();
 
             _grid.Width = ViewSettings.SquareSideLength;
             _grid.Height = ViewSettings.SquareSideLength;
 
-            Grid.SetRow(_grid, row);
-            Grid.SetColumn(_grid, column);
+            Grid.SetRow(_grid, Row);
+            Grid.SetColumn(_grid, Column);
 
             int leftThickness = ViewSettings.BorderThickness;
             int topThickness = ViewSettings.BorderThickness;
             int rightThickness = ViewSettings.BorderThickness;
             int bottomThickness = ViewSettings.BorderThickness;
 
-            if (column == 3 || column == 6) leftThickness = ViewSettings.SectionBorderThickness;
-            if (row == 3 || row == 6) topThickness = ViewSettings.SectionBorderThickness;
-            if (column == 2 || column == 5) rightThickness = ViewSettings.SectionBorderThickness;
-            if (row == 2 || row == 5) bottomThickness = ViewSettings.SectionBorderThickness;
+            if (Column == 3 || Column == 6) leftThickness = ViewSettings.SectionBorderThickness;
+            if (Row == 3 || Row == 6) topThickness = ViewSettings.SectionBorderThickness;
+            if (Column == 2 || Column == 5) rightThickness = ViewSettings.SectionBorderThickness;
+            if (Row == 2 || Row == 5) bottomThickness = ViewSettings.SectionBorderThickness;
 
             Border border = new Border();
             border.BorderThickness = new System.Windows.Thickness(leftThickness, topThickness, rightThickness, bottomThickness);
@@ -59,14 +74,14 @@ namespace WPF_MVVM_SudokuSolver.ViewModels
             _grid.Children.Add(border);
         }
 
-        private void InitializeValueCells(int row, int column)
+        private void InitializeValueCells()
         {
             InitializeSubGrid();
             InitializeValueGrid();
             InitializeSubRow();
 
-            CreateValueBlock(row, column);
-            CreatePossibleValueBlocks(row, column);
+            CreateValueBlock();
+            CreatePossibleValueBlocks();
 
             _subGrid.Children.Add(_valueGrid);
             _subGrid.Children.Add(_subRow);
@@ -118,42 +133,45 @@ namespace WPF_MVVM_SudokuSolver.ViewModels
             Grid.SetColumnSpan(_valueGrid, ViewSettings.ValueGridColumnSpan);
         }
 
-        private void CreatePossibleValueBlocks(int row, int column)
+        private void CreatePossibleValueBlocks()
         {
-            for (int i = 0; i < ViewSettings.Numbers - ViewSettings.SubRowValues; i++)
+            for (int i = 0; i < ModelSettings.Numbers - ViewSettings.SubRowValues; i++)
             {
                 _subGrid.Children.Add(CreateTextBlock(i));
             }
 
-            CreateSubRowBlocks(row, column);
+            CreateSubRowBlocks(Row, Column);
         }
 
         private void CreateSubRowBlocks(int row, int column)
         {
-            for (int i = ViewSettings.Numbers - ViewSettings.SubRowValues; i < ViewSettings.Numbers; i++)
+            for (int i = ModelSettings.Numbers - ViewSettings.SubRowValues; i < ModelSettings.Numbers; i++)
             {
                 _subRow.Children.Add(CreateTextBlock(i));
             }
         }
 
-        private void CreateValueBlock(int row, int column)
+        private void CreateValueBlock()
         {
-            Row = row;
-            Column = column;
-
             TextBlock textBlock = new TextBlock();
             textBlock.HorizontalAlignment = HorizontalAlignment.Center;
             textBlock.VerticalAlignment = VerticalAlignment.Center;
-            textBlock.Foreground = Brushes.Black;
             textBlock.FontSize =  ViewSettings.ValueBlockFontSize;
 
-            MultiBinding binding = new MultiBinding();
-            binding.Converter = new PuzzleValueConverter();
-            binding.Bindings.Add(new Binding("PuzzleValues") { Source = _dataContext });
-            binding.Bindings.Add(new Binding("Row") { Source = this });
-            binding.Bindings.Add(new Binding("Column") { Source = this });
-            textBlock.SetBinding(TextBlock.TextProperty, binding);
-            
+            MultiBinding valueBinding = new MultiBinding();
+            valueBinding.Converter = new PuzzleValueConverter();
+            valueBinding.Bindings.Add(new Binding("Squares") { Source = _dataContext });
+            valueBinding.Bindings.Add(new Binding("Row") { Source = this });
+            valueBinding.Bindings.Add(new Binding("Column") { Source = this });
+            textBlock.SetBinding(TextBlock.TextProperty, valueBinding);
+
+            MultiBinding colorBinding = new MultiBinding();
+            colorBinding.Converter = new PuzzleValueColorConverter();
+            colorBinding.Bindings.Add(new Binding("Squares") { Source = _dataContext });
+            colorBinding.Bindings.Add(new Binding("Row") { Source = this });
+            colorBinding.Bindings.Add(new Binding("Column") { Source = this });
+            textBlock.SetBinding(TextBlock.ForegroundProperty, colorBinding);
+
             _valueGrid.Children.Add(textBlock);
         }
 
@@ -164,9 +182,25 @@ namespace WPF_MVVM_SudokuSolver.ViewModels
             textBlock.VerticalAlignment = VerticalAlignment.Center;
             textBlock.Foreground = Brushes.DarkGray;
 
-            textBlock.Text = "A";
+            //textBlock.Text = "A";
             Grid.SetRow(textBlock, ViewSettings.PossibleValuePosition[number, 0]);
             Grid.SetColumn(textBlock, ViewSettings.PossibleValuePosition[number, 1]);
+
+            MultiBinding valueBinding = new MultiBinding();
+            valueBinding.Converter = new PossibleValueConverter();
+            valueBinding.Bindings.Add(new Binding("Squares") { Source = _dataContext });
+            valueBinding.Bindings.Add(new Binding("Row") { Source = this });
+            valueBinding.Bindings.Add(new Binding("Column") { Source = this });
+            valueBinding.Bindings.Add(new Binding($"Indexes[{number}]") { Source = this });
+            textBlock.SetBinding(TextBlock.TextProperty, valueBinding);
+
+            MultiBinding colorBinding = new MultiBinding();
+            colorBinding.Converter = new PossibleValueColorConverter();
+            colorBinding.Bindings.Add(new Binding("Squares") { Source = _dataContext });
+            colorBinding.Bindings.Add(new Binding("Row") { Source = this });
+            colorBinding.Bindings.Add(new Binding("Column") { Source = this });
+            colorBinding.Bindings.Add(new Binding($"Indexes[{number}]") { Source = this });
+            textBlock.SetBinding(TextBlock.ForegroundProperty, colorBinding);
 
             return textBlock;
         }

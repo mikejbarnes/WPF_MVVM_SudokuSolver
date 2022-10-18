@@ -8,13 +8,14 @@ using System.Windows.Data;
 
 namespace WPF_MVVM_SudokuSolver.ViewModels.Converters
 {
-    class PuzzleValueConverter : IMultiValueConverter
+    class PossibleValueConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            BindingConditioner puzzleSquare = new BindingConditioner(values);
+            BindingConditioner possibleSquare = new BindingConditioner(values);
+            int index = (int)values[3];
 
-            string outputString = puzzleSquare.Square.PuzzleValue.ToString();
+            string outputString = possibleSquare.Square.PossibleValues[index].ToString();
 
             return outputString.Equals("0") ? "_" : outputString;
         }

@@ -9,61 +9,47 @@ namespace WPF_MVVM_SudokuSolver.Models
 {
     class Model
     {
-        private string[,][] _puzzleValues;
-        private string[,][][] _possibleValues;
+        public Square[,] Squares;
 
         public Model()
         {
-            InitializePuzzleValues();
-            InitializePossibleValues();
-        }
-    
-        public DisplayPackage CreateDisplayPackage()
-        {
-            return new DisplayPackage(_puzzleValues, _possibleValues);
+            InitializeSquares();
         }
 
-        private void InitializePuzzleValues()
+        private void InitializeSquares()
         {
-            string[,][] newGrid = new string[ViewSettings.Numbers, ViewSettings.Numbers][];
+            Squares = new Square[ModelSettings.Numbers, ModelSettings.Numbers];
 
-            for(int i = 0; i < ViewSettings.Numbers; i++)
+            for(int row = 0; row < ModelSettings.Numbers; row++)
             {
-                for(int j = 0; j < ViewSettings.Numbers; j++)
+                for(int column = 0; column < ModelSettings.Numbers; column++)
                 {
-                    newGrid[i, j] = new string[] { (i+1).ToString(), "Black" };
+                    Squares[row, column] = new Square(row, column);
                 }
             }
-
-            _puzzleValues = newGrid;
         }
 
-        private void InitializePossibleValues()
+        public void LoadPuzzle(string rawPuzzle)
         {
-            string[,][][] newGrid = new string[ViewSettings.Numbers, ViewSettings.Numbers][][];
-
-            for (int i = 0; i < ViewSettings.Numbers; i++)
+            int numberOfSquares = ModelSettings.Numbers * ModelSettings.Numbers;
+            for(int i = 0; i < numberOfSquares; i++)
             {
-                for (int j = 0; j < ViewSettings.Numbers; j++)
+                int row = i / ModelSettings.Numbers;
+                int column = i % ModelSettings.Numbers;
+
+                Squares[row, column].PuzzleValue = rawPuzzle[i];
+            }
+        }
+
+        public void ResetColors()
+        {
+            for(int row = 0; row < ModelSettings.Numbers; row++)
+            {
+                for(int column = 0; column < ModelSettings.Numbers; column++)
                 {
-                    string[] newValues = new string[ViewSettings.Numbers];
-                    for(int k = 0; k < ViewSettings.Numbers; k++)
-                    {
-                        newValues[k] = (k + 1).ToString();
-                    }
-
-                    string[] newColors = new string[ViewSettings.Numbers];
-                    for (int k = 0; k < ViewSettings.Numbers; k++)
-                    {
-                        newColors[k] = "Black";
-                    }
-
-                    string[][] newCell = new string[][] { newValues, newColors };
-                    newGrid[i, j] = newCell;
+                    Squares[row, column].ResetColors();
                 }
             }
-
-            _possibleValues = newGrid;
         }
     }
 }

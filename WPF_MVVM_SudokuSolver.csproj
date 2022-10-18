@@ -55,8 +55,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Models\DisplayPackage.cs" />
+    <Compile Include="Models\ModelSettings.cs" />
+    <Compile Include="Models\Solver.cs" />
+    <Compile Include="Models\Square.cs" />
+    <Compile Include="ViewModels\Commands\RelayCommand.cs" />
+    <Compile Include="ViewModels\Converters\PossibleValueColorConverter.cs" />
+    <Compile Include="ViewModels\Converters\PossibleValueConverter.cs" />
+    <Compile Include="ViewModels\Converters\BindingConditioner.cs" />
+    <Compile Include="ViewModels\Converters\PuzzleValueColorConverter.cs" />
     <Compile Include="ViewModels\Converters\PuzzleValueConverter.cs" />
+    <Compile Include="ViewModels\InputTextConditioner.cs" />
     <Compile Include="ViewModels\SquareView.cs" />
     <Compile Include="ViewModels\ViewBuilder.cs" />
     <Compile Include="ViewModels\ViewModel.cs" />
@@ -101,8 +109,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ViewModels\Commands\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
