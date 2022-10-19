@@ -21,16 +21,22 @@ namespace WPF_MVVM_SudokuSolver.Models
 
         public void SolveNextStep()
         {
-            _canSolveNextStep = true;
+            if(!CheckIfPuzzledIsSolved())
+            {
+                _canSolveNextStep = true;
 
-            SolvePuzzle();
+                SolvePuzzle();
+            }
         }
 
         public void SolveAll()
         {
-            _canSolveAll = true;
+            if (!CheckIfPuzzledIsSolved())
+            {
+                _canSolveAll = true;
 
-            SolvePuzzle();
+                SolvePuzzle();
+            }
         }
 
         public void ResetSolver()
@@ -41,10 +47,10 @@ namespace WPF_MVVM_SudokuSolver.Models
 
         public void SolvePuzzle()
         {
-            _model.ResetColors();
-
             while(_canSolveNextStep || _canSolveAll)
             {
+                _model.ResetColors();
+
                 int row = _currentSquare / ModelSettings.Numbers;
                 int column = _currentSquare % ModelSettings.Numbers;
 
@@ -52,66 +58,85 @@ namespace WPF_MVVM_SudokuSolver.Models
 
                 targetSquare.SetSquareAsTarget();
 
+                //Keeps track of whether any changes have occurred in any squares so it can automatically cycle through squares
+                //until a significant change happens instead of manually clicking through each iteration where nothing is happening
+                bool squaresHaveChanged = false;
+
                 if (targetSquare.PuzzleValue.Equals('0'))
                 {
-                    targetSquare.CheckForOnlyRemainingPossibleValue();
+                    squaresHaveChanged = targetSquare.CheckForOnlyRemainingPossibleValue() || squaresHaveChanged;
                 }
 
                 if (!targetSquare.PuzzleValue.Equals('0'))
                 {
-                    UpdatePossibleValuesInRow(targetSquare);
-                    UpdatePossibleValuesInColumn(targetSquare);
-                    UpdatePossibleValuesInSection(targetSquare);
+                    squaresHaveChanged = UpdatePossibleValuesInRow(targetSquare) || squaresHaveChanged;
+                    squaresHaveChanged = UpdatePossibleValuesInColumn(targetSquare) || squaresHaveChanged;
+                    squaresHaveChanged = UpdatePossibleValuesInSection(targetSquare) || squaresHaveChanged;
                 }
 
                 if (targetSquare.PuzzleValue.Equals('0'))
                 {
-                    CheckRowForUniqueValue(targetSquare);
-                    CheckColumnForUniqueValue(targetSquare);
-                    CheckSectionForUniqueValue(targetSquare);
+                    squaresHaveChanged = CheckRowForUniqueValue(targetSquare) || squaresHaveChanged;
+                    squaresHaveChanged = CheckColumnForUniqueValue(targetSquare) || squaresHaveChanged;
+                    squaresHaveChanged = CheckSectionForUniqueValue(targetSquare) || squaresHaveChanged;
                 }
-
 
                 IterateCurrentSquare();
-                _canSolveNextStep = false;
-                
-                if(_loops >= ModelSettings.MaximumLoops || CheckIfPuzzledIsSolved())
+
+                if (CheckIfPuzzledIsSolved() || _loops >= ModelSettings.MaximumLoops)
                 {
                     _canSolveAll = false;
+                    _model.ResetColors();
                 }
+                else if(!squaresHaveChanged)
+                {
+                    continue;    
+                }
+                
+                _canSolveNextStep = false;
             }
         }
 
         private void IterateCurrentSquare()
         {
             _currentSquare = (_currentSquare + 1) % (ModelSettings.Numbers * ModelSettings.Numbers);
-            _loops++;
+            _loops += _currentSquare/(ModelSettings.Numbers * ModelSettings.Numbers - 1);
         }
 
-        private void UpdatePossibleValuesInRow(Square square)
+        private bool UpdatePossibleValuesInRow(Square square)
         {
+            bool valuesHaveChanged = false;
+
             for (int column = 0; column < ModelSettings.Numbers; column++)
             {
                 if (_model.Squares[square.Row, column].PuzzleValue.Equals('0') && column != square.Column)
                 {
-                    _model.Squares[square.Row, column].RemovePossibleValues(square.PuzzleValue);
+                    valuesHaveChanged = _model.Squares[square.Row, column].RemovePossibleValues(square.PuzzleValue) || valuesHaveChanged;
                 }
             }
+
+            return valuesHaveChanged;
         }
 
-        private void UpdatePossibleValuesInColumn(Square square)
+        private bool UpdatePossibleValuesInColumn(Square square)
         {
+            bool valuesHaveChanged = false;
+
             for(int row = 0; row < ModelSettings.Numbers; row++)
             {
                 if(_model.Squares[row, square.Column].PuzzleValue.Equals('0') && row != square.Row)
                 {
-                    _model.Squares[row, square.Column].RemovePossibleValues(square.PuzzleValue);
+                    valuesHaveChanged = _model.Squares[row, square.Column].RemovePossibleValues(square.PuzzleValue) || valuesHaveChanged;
                 }
             }
+
+            return valuesHaveChanged;
         }
 
-        private void UpdatePossibleValuesInSection(Square square)
+        private bool UpdatePossibleValuesInSection(Square square)
         {
+            bool valuesHaveChanged = false;
+
             int minRow = (square.Section / ModelSettings.HeightSections) * ModelSettings.RowsPerSection;
             int maxRow = minRow + ModelSettings.RowsPerSection;
             int minColumn = (square.Section % ModelSettings.WidthSections) * ModelSettings.ColumnsPerSection;
@@ -123,43 +148,45 @@ namespace WPF_MVVM_SudokuSolver.Models
                 {
                     if (_model.Squares[row, column].PuzzleValue.Equals('0') && (square.Row != row || square.Column != column))
                     {
-                        _model.Squares[row, column].RemovePossibleValues(square.PuzzleValue);
+                        valuesHaveChanged = _model.Squares[row, column].RemovePossibleValues(square.PuzzleValue) || valuesHaveChanged;
                     }
                 }
             }
+
+            return valuesHaveChanged;
         }
 
-        private void CheckRowForUniqueValue(Square square)
+        private bool CheckRowForUniqueValue(Square square)
         {
             square.InitializePossibleUniqueValues();
 
             for (int column = 0; column < ModelSettings.Numbers; column++)
             {
-                if (_model.Squares[square.Row, column].PuzzleValue.Equals('0') && column != square.Column)
+                if (column != square.Column)
                 {
                     square.RemovePossibleUniqueValues(_model.Squares[square.Row, column].PossibleValues);
                 }
             }
 
-            square.CheckForUniqueValue();
+            return square .CheckForUniqueValue();
         }
 
-        private void CheckColumnForUniqueValue(Square square)
+        private bool CheckColumnForUniqueValue(Square square)
         {
             square.InitializePossibleUniqueValues();
 
             for (int row = 0; row < ModelSettings.Numbers; row++)
             {
-                if (_model.Squares[row, square.Column].PuzzleValue.Equals('0') && row != square.Row)
+                if (row != square.Row)
                 {
                     square.RemovePossibleUniqueValues(_model.Squares[row, square.Column].PossibleValues);
                 }
             }
 
-            square.CheckForUniqueValue();
+            return square.CheckForUniqueValue();
         }
 
-        private void CheckSectionForUniqueValue(Square square)
+        private bool CheckSectionForUniqueValue(Square square)
         {
             int minRow = (square.Section / ModelSettings.HeightSections) * ModelSettings.RowsPerSection;
             int maxRow = minRow + ModelSettings.RowsPerSection;
@@ -172,14 +199,14 @@ namespace WPF_MVVM_SudokuSolver.Models
             {
                 for (int column = minColumn; column < maxColumn; column++)
                 {
-                    if (_model.Squares[row, column].PuzzleValue.Equals('0') && (square.Row != row || square.Column != column))
+                    if (square.Row != row || square.Column != column)
                     {
                         square.RemovePossibleUniqueValues(_model.Squares[row, column].PossibleValues);
                     }
                 }
             }
 
-            square.CheckForUniqueValue();
+            return square.CheckForUniqueValue();
         }
 
         private bool CheckIfPuzzledIsSolved()

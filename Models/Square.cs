@@ -37,15 +37,21 @@ namespace WPF_MVVM_SudokuSolver.Models
         {
             Row = row;
             Column = column;
-            PuzzleValueColor = ModelSettings.ColorState.Normal;
             CalculateSection();
-            InitializePossibleValues(ref _possibleValues);
-            InitializePossibleValueColors();
+            ResetSquare();
         }
 
         private void CalculateSection()
         {
             Section = ModelSettings.WidthSections * (Row / ModelSettings.HeightSections) + Column / ModelSettings.WidthSections;
+        }
+
+        public void ResetSquare()
+        {
+            PuzzleValue = '0';
+            PuzzleValueColor = ModelSettings.ColorState.Normal;
+            InitializePossibleValues(ref _possibleValues);
+            InitializePossibleValueColors();
         }
 
         private void InitializePossibleValues(ref StringBuilder possibleValues)
@@ -100,24 +106,27 @@ namespace WPF_MVVM_SudokuSolver.Models
             }
         }
 
-        public void RemovePossibleValues(char value)
+        public bool RemovePossibleValues(char value)
         {
+            bool valuesHaveChanged = false;
+
             for (int i = 0; i < PossibleValues.Length; i++)
             {
                 if (!value.Equals('0') && PossibleValues[i].Equals(value))
                 {
                     PossibleValues.Replace(value, '0');
                     PossibleValueColors[i] = ModelSettings.ColorState.Changed;
+                    valuesHaveChanged = true;
                 }
             }
 
-            CheckForSoloValue(_possibleValues);
+            valuesHaveChanged = CheckForSoloValue(_possibleValues) || valuesHaveChanged;
+
+            return valuesHaveChanged;
         }
 
         public void RemovePossibleUniqueValues(StringBuilder otherSquarePossibleValues)
         {
-            Console.WriteLine("Other PV: {0}", otherSquarePossibleValues.ToString());
-
             for(int i = 0; i < _possibleUniqueValues.Length; i++)
             {
                 if(!otherSquarePossibleValues[i].Equals('0'))
@@ -125,12 +134,12 @@ namespace WPF_MVVM_SudokuSolver.Models
                     _possibleUniqueValues.Replace(otherSquarePossibleValues[i], '0');   
                 }
             }
-
-            Console.WriteLine("PV {0}", _possibleUniqueValues.ToString());
         }
 
-        private void CheckForSoloValue(StringBuilder possibleValues)
+        private bool CheckForSoloValue(StringBuilder possibleValues)
         {
+            bool valuesHaveChanged = false;
+
             StringBuilder possibleValuesRemaining = new StringBuilder();
 
             for(int i = 0; i < possibleValues.Length; i++)
@@ -141,22 +150,23 @@ namespace WPF_MVVM_SudokuSolver.Models
                 }
             }
 
-            Console.WriteLine("{0} {1}", possibleValues.ToString(), possibleValuesRemaining.ToString());
-
             if(possibleValuesRemaining.Length == 1)
             {
                 PuzzleValue = possibleValuesRemaining[0];
+                valuesHaveChanged = true;
             }
+
+            return valuesHaveChanged;
         }
 
-        public void CheckForOnlyRemainingPossibleValue()
+        public bool CheckForOnlyRemainingPossibleValue()
         {
-            CheckForSoloValue(_possibleValues);
+            return CheckForSoloValue(_possibleValues);
         }
 
-        public void CheckForUniqueValue()
+        public bool CheckForUniqueValue()
         {
-            CheckForSoloValue(_possibleUniqueValues);
+            return CheckForSoloValue(_possibleUniqueValues);
         }
 
         public void SetSquareAsTarget()

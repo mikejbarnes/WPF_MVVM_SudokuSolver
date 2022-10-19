@@ -51,5 +51,16 @@ namespace WPF_MVVM_SudokuSolver.Models
                 }
             }
         }
+
+        public void ResetSquares()
+        {
+            for(int row = 0; row < ModelSettings.Numbers; row++)
+            {
+                for(int column = 0; column < ModelSettings.Numbers; column++)
+                {
+                    Squares[row, column].ResetSquare();
+                }
+            }
+        }
     }
 }

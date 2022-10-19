@@ -79,6 +79,7 @@ namespace WPF_MVVM_SudokuSolver.ViewModels
             bool inputTextIsOk = InputTextConditioner.ConditionInputText(_inputText, out conditionedText);
             if (inputTextIsOk)
             {
+                _model.ResetSquares();
                 _model.LoadPuzzle(conditionedText);
                 _solver.ResetSolver();
                 InputText = "";
