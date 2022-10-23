@@ -56,8 +56,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Models\ModelSettings.cs" />
+    <Compile Include="Models\SectionLimits.cs" />
     <Compile Include="Models\Solver.cs" />
     <Compile Include="Models\Square.cs" />
+    <Compile Include="Models\UniqueValueTracker.cs" />
     <Compile Include="ViewModels\Commands\RelayCommand.cs" />
     <Compile Include="ViewModels\Converters\PossibleValueColorConverter.cs" />
     <Compile Include="ViewModels\Converters\PossibleValueConverter.cs" />

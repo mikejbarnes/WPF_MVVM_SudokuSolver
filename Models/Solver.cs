@@ -65,20 +65,18 @@ namespace WPF_MVVM_SudokuSolver.Models
                 if (targetSquare.PuzzleValue.Equals('0'))
                 {
                     squaresHaveChanged = targetSquare.CheckForOnlyRemainingPossibleValue() || squaresHaveChanged;
-                }
 
-                if (!targetSquare.PuzzleValue.Equals('0'))
+                    squaresHaveChanged = CheckRowForUniqueValue(targetSquare) || squaresHaveChanged;
+                    squaresHaveChanged = CheckColumnForUniqueValue(targetSquare) || squaresHaveChanged;
+                    squaresHaveChanged = CheckSectionForUniqueValue(targetSquare) || squaresHaveChanged;
+
+                    squaresHaveChanged = CheckSectionForUniqueRowAndColumnValues(targetSquare) || squaresHaveChanged;
+                }
+                else
                 {
                     squaresHaveChanged = UpdatePossibleValuesInRow(targetSquare) || squaresHaveChanged;
                     squaresHaveChanged = UpdatePossibleValuesInColumn(targetSquare) || squaresHaveChanged;
                     squaresHaveChanged = UpdatePossibleValuesInSection(targetSquare) || squaresHaveChanged;
-                }
-
-                if (targetSquare.PuzzleValue.Equals('0'))
-                {
-                    squaresHaveChanged = CheckRowForUniqueValue(targetSquare) || squaresHaveChanged;
-                    squaresHaveChanged = CheckColumnForUniqueValue(targetSquare) || squaresHaveChanged;
-                    squaresHaveChanged = CheckSectionForUniqueValue(targetSquare) || squaresHaveChanged;
                 }
 
                 IterateCurrentSquare();
@@ -207,6 +205,67 @@ namespace WPF_MVVM_SudokuSolver.Models
             }
 
             return square.CheckForUniqueValue();
+        }
+
+        //Checks whether a row (or column) within a section is the only row (or column) with a certain value within that section. That implies that the value must be within that row (or column),
+        //so the value can be removed from the possible values of squares in other sections in that row (or column)
+        private bool CheckSectionForUniqueRowAndColumnValues(Square square)
+        {
+            bool valuesHaveChanged = false;
+
+            UniqueValueTracker tracker = new UniqueValueTracker();
+
+            for (int row = Model.SectionDimensions[square.Section].MinRow; row < Model.SectionDimensions[square.Section].MaxRow; row++)
+            {
+                for (int column = Model.SectionDimensions[square.Section].MinColumn; column < Model.SectionDimensions[square.Section].MaxColumn; column++)
+                {
+                    if(_model.Squares[row, column].PuzzleValue.Equals('0'))
+                    {
+                        tracker.TrackValues(_model.Squares[row, column]);
+                    } 
+                }
+            }
+
+            for(int i = 0; i < ModelSettings.Numbers; i++)
+            {
+                if(tracker.RowValueTracker[i] >= 0)
+                {
+                    int row = tracker.RowValueTracker[i] + Model.SectionDimensions[square.Section].MinRow;
+                    RemovePossibleValuesInOtherSectionsInRow(Convert.ToChar(i+1), row, square.Section);
+                    valuesHaveChanged = true;
+                }
+
+                if(tracker.ColumnValueTracker[i] >= 0)
+                {
+                    int column = tracker.ColumnValueTracker[i] + Model.SectionDimensions[square.Section].MinColumn;
+                    RemovePossibleValuesInOtherSectionsInColumn(Convert.ToChar(i + 1), column, square.Section);
+                    valuesHaveChanged = true;
+                }
+            }
+
+            return valuesHaveChanged;
+        }
+
+        private void RemovePossibleValuesInOtherSectionsInRow(char value, int row, int section)
+        {
+            for(int column = 0; column < ModelSettings.Numbers; column++)
+            {
+                if(_model.Squares[row, column].Section != section)
+                {
+                    _model.Squares[row, column].RemovePossibleValues(value);
+                }
+            }
+        }
+
+        private void RemovePossibleValuesInOtherSectionsInColumn(char value, int column, int section)
+        {
+            for (int row = 0; row < ModelSettings.Numbers; row++)
+            {
+                if (_model.Squares[row, column].Section != section)
+                {
+                    _model.Squares[row, column].RemovePossibleValues(value);
+                }
+            }
         }
 
         private bool CheckIfPuzzledIsSolved()

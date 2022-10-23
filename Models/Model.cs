@@ -11,9 +11,12 @@ namespace WPF_MVVM_SudokuSolver.Models
     {
         public Square[,] Squares;
 
+        public static SectionLimits[] SectionDimensions { get; private set; }
+
         public Model()
         {
             InitializeSquares();
+            CalculateSectionLimits();
         }
 
         private void InitializeSquares()
@@ -26,6 +29,16 @@ namespace WPF_MVVM_SudokuSolver.Models
                 {
                     Squares[row, column] = new Square(row, column);
                 }
+            }
+        }
+
+        private void CalculateSectionLimits()
+        {
+            SectionDimensions = new SectionLimits[ModelSettings.WidthSections * ModelSettings.HeightSections];
+
+            for(int i = 0; i < SectionDimensions.Length; i++)
+            {
+                SectionDimensions[i] = new SectionLimits(i);
             }
         }
 
